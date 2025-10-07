@@ -1,5 +1,11 @@
 package com.spring.attendanceApp.services;
 
-public interface AttendanceSessionService {
+import com.spring.attendanceApp.dtos.AttendanceSessionDTO;
 
+import java.util.List;
+
+public interface AttendanceSessionService {
+    AttendanceSessionDTO createSession(Long subjectId, AttendanceSessionDTO dto);
+    AttendanceSessionDTO getSessionById(Long id);
+    List<AttendanceSessionDTO> getAllSessions();
 }

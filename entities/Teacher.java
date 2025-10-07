@@ -1,7 +1,10 @@
 package com.spring.attendanceApp.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "teacher")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Teacher {
 
     @Id
@@ -17,9 +22,9 @@ public class Teacher {
 
     private String name;
 
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AttendanceSession> session = new ArrayList<>();
+    private String department;
 
-    @OneToMany(mappedBy = "teacher")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Subject> subjects = new ArrayList<>();
 }

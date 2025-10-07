@@ -1,5 +1,7 @@
 package com.spring.attendanceApp.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,10 +25,21 @@ public class Subject {
 
     private String code;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;
 
-    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AttendanceSession> sessions = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "subject_students",
+            joinColumns = @JoinColumn(name = "subject_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private List<Student> students = new ArrayList<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
+    private List<AttendanceSession> attendanceSessions = new ArrayList<>();
 }

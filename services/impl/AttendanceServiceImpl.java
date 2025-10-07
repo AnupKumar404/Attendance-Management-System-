@@ -1,5 +1,6 @@
 package com.spring.attendanceApp.services.impl;
 
+import com.spring.attendanceApp.dtos.AttendanceRecordDTO;
 import com.spring.attendanceApp.entities.AttendanceRecord;
 import com.spring.attendanceApp.entities.AttendanceSession;
 import com.spring.attendanceApp.entities.Student;
@@ -7,82 +8,77 @@ import com.spring.attendanceApp.enums.AttendanceStatus;
 import com.spring.attendanceApp.repositories.AttendanceRecordRepository;
 import com.spring.attendanceApp.repositories.AttendanceSessionRepository;
 import com.spring.attendanceApp.repositories.StudentRepository;
-import com.spring.attendanceApp.repositories.SubjectRepository;
 import com.spring.attendanceApp.services.AttendanceService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AttendanceServiceImpl implements AttendanceService {
 
-    private final StudentRepository studentRepository;
-    private final SubjectRepository subjectRepository;
-    private final AttendanceRecordRepository attendanceRecordRepository;
     private final AttendanceSessionRepository attendanceSessionRepository;
 
-    @Override
-    public AttendanceRecord markAttendance(Long studentId, Long sessionId, AttendanceStatus status) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow();
+    private final AttendanceRecordRepository attendanceRecordRepository;
 
+    private final StudentRepository studentRepository;
+
+    private final ModelMapper modelMapper;
+
+
+    @Override
+    public List<AttendanceRecordDTO> markAttendance(Long sessionId, List<AttendanceRecordDTO> records) {
         AttendanceSession session = attendanceSessionRepository.findById(sessionId)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Session not found"));
 
-        // Prevent duplicate attendance entry for same student & date & subject
-        Optional<AttendanceRecord> existing = attendanceRecordRepository
-                .findByStudentAndSession(student, session);
+        List<AttendanceRecord> savedRecords = records.stream().map(dto -> {
+            Student student = studentRepository.findById(dto.getStudentId())
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+            AttendanceRecord record = new AttendanceRecord();
+            record.setStudent(student);
+            record.setSession(session);
+            record.setStatus(dto.getStatus());
+            return record;
+        }).map(attendanceRecordRepository::save).toList();
 
-        if(existing.isPresent()){
-            throw new RuntimeException("Attendance already marked for this student on this day");
-        }
-
-        AttendanceRecord attendanceRecord = new AttendanceRecord();
-        attendanceRecord.setStudent(student);
-        attendanceRecord.setSession(session);
-        attendanceRecord.setStatus(status);
-
-        return attendanceRecordRepository.save(attendanceRecord);
+        return savedRecords.stream()
+                .map(r -> modelMapper.map(r, AttendanceRecordDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public AttendanceRecord updateAttendance(Long attendanceId, AttendanceStatus status) {
-        AttendanceRecord record = attendanceRecordRepository.findById(attendanceId)
-                .orElseThrow(() -> new RuntimeException("Attendance record not found"));
+    public AttendanceRecordDTO updateAttendance(Long recordId, AttendanceStatus status) {
+        AttendanceRecord record = attendanceRecordRepository.findById(recordId)
+                .orElseThrow(() -> new RuntimeException("Not found"));
         record.setStatus(status);
-        return attendanceRecordRepository.save(record);
+        attendanceRecordRepository.save(record);
+        return modelMapper.map(record, AttendanceRecordDTO.class);
     }
 
     @Override
-    public List<AttendanceRecord> getAttendanceByStudent(Long studentId) {
-        return attendanceRecordRepository.findByStudentId(studentId);
+    public List<AttendanceRecordDTO> getAttendanceByStudent(Long studentId) {
+        return attendanceRecordRepository.findByStudentId(studentId)
+                .stream().map(r -> modelMapper.map(r, AttendanceRecordDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<AttendanceRecord> getAttendanceBySubject(Long subjectId) {
-        return attendanceRecordRepository.findBySubjectId(subjectId);
+    public List<AttendanceRecordDTO> getAttendanceBySession(Long sessionId) {
+        return attendanceRecordRepository.findBySessionId(sessionId).stream()
+                .map(r -> modelMapper.map(r, AttendanceRecordDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<AttendanceRecord> getAttendanceBySession(Long sessionId) {
-        return attendanceRecordRepository.findBySessionId(sessionId);
-    }
-
-    @Override
-    public double getAttendancePercentage(Long studentId, Long subjectId) {
-        long total = attendanceRecordRepository.countByStudentIdAndSubjectId(studentId, subjectId);
-        long present = attendanceRecordRepository.countByStudentIdAndSession_SubjectIdAndStatus(studentId, subjectId, AttendanceStatus.PRESENT);
-        return total == 0 ? 0.0 : (present * 100.0) / total;
-    }
-
-    @Override
-    public List<Student> getDefaulters(Long subjectId, double threshold) {
-//        List<Student> all = subjectRepository.findById(subjectId)
-//                .orElseThrow(() -> new RuntimeException("Subject Not found"))
-//                .get;
-        return List.of();
+    public List<AttendanceRecordDTO> getAttendanceByDate(LocalDate date) {
+        return attendanceRecordRepository.findByDate(date).stream()
+                .map(r -> modelMapper.map(r, AttendanceRecordDTO.class))
+                .collect(Collectors.toList());
     }
 }

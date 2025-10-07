@@ -1,5 +1,7 @@
 package com.spring.attendanceApp.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,19 +22,16 @@ public class AttendanceSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
-
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
-
     private LocalDate date;
 
     private String topic;
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AttendanceRecord> attendanceRecords = new ArrayList<>();
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AttendanceRecord> records = new ArrayList<>();
 }
