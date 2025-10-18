@@ -5,22 +5,21 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Getter
 public class UserDto {
 
     @NotBlank(message = "Name is required")
     private String username;
 
-    @Email
-    private String email;
-
     private String password;
+
+    private String fullName;
 
     @Enumerated(EnumType.STRING)
     private Role role;

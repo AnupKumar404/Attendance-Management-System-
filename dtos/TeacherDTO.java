@@ -8,7 +8,5 @@ import java.util.List;
 public class TeacherDTO {
     private Long id;
     private String name;
-    private String rollNumber;
     private String department;
-    private List<Long> teacherIds;
 }

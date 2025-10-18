@@ -8,7 +8,6 @@ import java.util.Set;
 public class StudentDTO {
     private Long id;
     private String name;
-    private String rollNumber;
+    private String rollNo;
     private String department;
-    private Set<Long> subjectIds;
 }

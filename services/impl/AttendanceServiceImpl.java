@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,10 +41,12 @@ public class AttendanceServiceImpl implements AttendanceService {
         List<AttendanceRecord> savedRecords = records.stream().map(dto -> {
             Student student = studentRepository.findById(dto.getStudentId())
                     .orElseThrow(() -> new RuntimeException("Student not found"));
+
             AttendanceRecord record = new AttendanceRecord();
-            record.setStudent(student);
             record.setSession(session);
+            record.setStudent(student);
             record.setStatus(dto.getStatus());
+            record.setMarkedAt(session.getSessionDate());
             return record;
         }).map(attendanceRecordRepository::save).toList();
 

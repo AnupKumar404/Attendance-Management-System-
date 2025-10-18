@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/register")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<List<User>> getAll(){
+    public ResponseEntity<List<UserDto>> getAll(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 

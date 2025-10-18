@@ -3,8 +3,6 @@ package com.spring.attendanceApp.services.impl;
 import com.spring.attendanceApp.dtos.AttendanceSessionDTO;
 import com.spring.attendanceApp.entities.AttendanceSession;
 import com.spring.attendanceApp.entities.Subject;
-import com.spring.attendanceApp.entities.User;
-import com.spring.attendanceApp.exceptions.UserNotFoundException;
 import com.spring.attendanceApp.repositories.AttendanceSessionRepository;
 import com.spring.attendanceApp.repositories.SubjectRepository;
 import com.spring.attendanceApp.services.AttendanceSessionService;
@@ -28,7 +26,7 @@ public class AttendanceSessionServiceImpl implements AttendanceSessionService {
     @Override
     public AttendanceSessionDTO createSession(Long subjectId, AttendanceSessionDTO dto) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new UserNotFoundException("Not found", null));
+                .orElseThrow();
         AttendanceSession session = modelMapper.map(dto, AttendanceSession.class);
         session.setSubject(subject);
         AttendanceSession saved = attendanceSessionRepository.save(session);
@@ -38,7 +36,7 @@ public class AttendanceSessionServiceImpl implements AttendanceSessionService {
     @Override
     public AttendanceSessionDTO getSessionById(Long id) {
         AttendanceSession session = attendanceSessionRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Session not found", null));
+                .orElseThrow();
         return modelMapper.map(session, AttendanceSessionDTO.class);
     }
 
@@ -47,5 +45,15 @@ public class AttendanceSessionServiceImpl implements AttendanceSessionService {
         return attendanceSessionRepository.findAll().stream()
                 .map(s -> modelMapper.map(s, AttendanceSessionDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public AttendanceSessionDTO updateSession(Long sessionId, AttendanceSessionDTO dto) {
+        AttendanceSession session = attendanceSessionRepository.findById(sessionId)
+                .orElseThrow();
+
+        modelMapper.map(dto, AttendanceSession.class);
+        AttendanceSession updatedSession = attendanceSessionRepository.save(session);
+        return modelMapper.map(updatedSession, AttendanceSessionDTO.class);
     }
 }

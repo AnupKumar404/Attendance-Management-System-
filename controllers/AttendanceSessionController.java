@@ -1,0 +1,46 @@
+package com.spring.attendanceApp.controllers;
+
+import com.spring.attendanceApp.dtos.AttendanceSessionDTO;
+import com.spring.attendanceApp.services.AttendanceSessionService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/attendanceSession")
+@RequiredArgsConstructor
+public class AttendanceSessionController {
+
+    private final AttendanceSessionService attendanceSessionService;
+
+    @PostMapping("/subject/{subjectId}")
+    @PreAuthorize("hasAuthority('TEACHER')")
+    public ResponseEntity<AttendanceSessionDTO> createSession(@PathVariable Long subjectId,
+                                                              @RequestBody AttendanceSessionDTO dto){
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(attendanceSessionService.createSession(subjectId, dto));
+    }
+
+    @GetMapping("get/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
+    public ResponseEntity<AttendanceSessionDTO> getSession(@PathVariable Long id){
+        return ResponseEntity.ok(attendanceSessionService.getSessionById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AttendanceSessionDTO>> getAllSessions(){
+        return ResponseEntity.ok(attendanceSessionService.getAllSessions());
+    }
+
+    @PutMapping("update/{id}")
+    public ResponseEntity<AttendanceSessionDTO> updateSession
+            (@PathVariable Long id, @RequestBody AttendanceSessionDTO dto){
+
+        return ResponseEntity.ok(attendanceSessionService.updateSession(id, dto));
+    }
+
+}

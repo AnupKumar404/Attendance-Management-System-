@@ -2,13 +2,15 @@ package com.spring.attendanceApp.dtos;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 public class AttendanceSessionDTO {
     private Long id;
-    private LocalDate sessionDate;
+    private LocalDateTime sessionDate;
     private Long subjectId;
-    private List<Long> recordIds;
+
+    public AttendanceSessionDTO() {
+        this.sessionDate = LocalDateTime.now();
+    }
 }

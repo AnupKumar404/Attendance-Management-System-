@@ -2,7 +2,6 @@ package com.spring.attendanceApp.services.impl;
 
 import com.spring.attendanceApp.dtos.StudentDTO;
 import com.spring.attendanceApp.entities.Student;
-import com.spring.attendanceApp.exceptions.UserNotFoundException;
 import com.spring.attendanceApp.repositories.StudentRepository;
 import com.spring.attendanceApp.services.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentDTO getStudentById(Long id) {
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Not found", null));
+                .orElseThrow();
         return modelMapper.map(student, StudentDTO.class);
     }
 
