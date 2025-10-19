@@ -28,6 +28,10 @@ public class Student {
     @Column(unique = true, nullable = false)
     private String rollNo;
 
+    @OneToOne
+    @MapsId
+    private User user;
+
     private String department;
 
     @JsonBackReference

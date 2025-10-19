@@ -1,10 +1,7 @@
 package com.spring.attendanceApp.controllers;
 
 import com.spring.attendanceApp.auth.AuthService;
-import com.spring.attendanceApp.dtos.JwtResponseDto;
-import com.spring.attendanceApp.dtos.LoginRequest;
-import com.spring.attendanceApp.dtos.RegisterRequestDto;
-import com.spring.attendanceApp.dtos.RegisterResponseDto;
+import com.spring.attendanceApp.dtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDto> register(@Valid @RequestBody RegisterRequestDto req) {
-        return ResponseEntity.ok(authService.register(req));
+    public ResponseEntity<TeacherResponseDto> register(@Valid @RequestBody RegisterTeacherRequestDto req) {
+        return ResponseEntity.ok(authService.registerTeacher(req));
     }
 }

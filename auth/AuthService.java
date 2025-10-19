@@ -1,13 +1,13 @@
 package com.spring.attendanceApp.auth;
 
-import com.spring.attendanceApp.dtos.RegisterResponseDto;
+import com.spring.attendanceApp.dtos.*;
+import com.spring.attendanceApp.entities.Teacher;
 import com.spring.attendanceApp.enums.Role;
+import com.spring.attendanceApp.repositories.TeacherRepository;
 import com.spring.attendanceApp.security.JwtProvider;
-import com.spring.attendanceApp.dtos.JwtResponseDto;
-import com.spring.attendanceApp.dtos.LoginRequest;
-import com.spring.attendanceApp.dtos.RegisterRequestDto;
 import com.spring.attendanceApp.entities.User;
 import com.spring.attendanceApp.repositories.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
     private final ModelMapper modelMapper;
+    private final TeacherRepository teacherRepository;
 
     public JwtResponseDto login(LoginRequest req) {
         Authentication authentication = authenticationManager.authenticate(
@@ -42,26 +45,32 @@ public class AuthService {
         return new JwtResponseDto(token, user.getId(), user.getUsername());
     }
 
-    public RegisterResponseDto register(RegisterRequestDto req) {
-        if (userRepo.existsByUsername(req.getUsername())) {
-            throw new UsernameNotFoundException("User Not found");
+//    public RegisterResponseDto register(RegisterRequestDto req) {
+//
+//    }
+
+    public TeacherResponseDto registerTeacher(RegisterTeacherRequestDto dto){
+        if(userRepo.existsByUsername(dto.getUsername())){
+            throw new EntityExistsException("Already exists");
         }
 
-
-       User user = User.builder()
-                .username(req.getUsername())
-                .password(passwordEncoder.encode(req.getPassword()))
-                .fullName(req.getFullName())
+        User user = User.builder()
+                .username(dto.getUsername())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .fullName(dto.getFullName())
+                .roles(Set.of(Role.TEACHER))
                 .build();
 
-        user.getRoles().add(Role.TEACHER);
-        User saved = userRepo.save(user);
-        return modelMapper.map(saved, RegisterResponseDto.class);
+        userRepo.save(user);
 
-//        JwtResponseDto resp = new JwtResponseDto();
-//        resp.setToken(jwtProvider.generateToken(saved));
-//        resp.setUserId(saved.getId());
-//        resp.setUsername(saved.getUsername());
-//        return resp;
+        Teacher teacher = Teacher.builder()
+                .user(user)
+                .fullName(dto.getFullName())
+                .department(dto.getDepartment())
+                .build();
+
+        teacherRepository.save(teacher);
+
+       return modelMapper.map(user, TeacherResponseDto.class);
     }
 }

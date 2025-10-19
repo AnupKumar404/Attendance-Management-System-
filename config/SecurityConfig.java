@@ -1,5 +1,6 @@
 package com.spring.attendanceApp.config;
 
+import com.spring.attendanceApp.enums.Role;
 import com.spring.attendanceApp.security.JwtAuthenticationFilter;
 import com.spring.attendanceApp.security.JwtProvider;
 import com.spring.attendanceApp.auth.CustomUserDetailsService;
@@ -51,9 +52,9 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-//                        .requestMatchers("/api/users/**", "/api/teachers/**", "/api/subjects/**", "/api/sessions/**", "/api/attendance/mark/**")
+//                        .requestMatchers( "/api/teachers/**",  "/api/sessions/**", "/api/attendance/mark/**")
 //                        .hasAuthority("TEACHER")
-//                        .requestMatchers("/api/attendance/student/**").hasAuthority("STUDENT")
+                        .requestMatchers("/api/students//**", "/api/users/**", "/api/subjects/**").hasRole(Role.TEACHER.name())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
