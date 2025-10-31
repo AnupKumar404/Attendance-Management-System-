@@ -17,4 +17,9 @@ public class RegisterRequestDto {
 
     @NotBlank
     private String fullName;
+
+    private String rollNo;
+
+    private String batch;
+
 }

@@ -2,39 +2,37 @@ package com.spring.attendanceApp.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
-@Table(name = "students")
-@Data
+@Table(name = "student")
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "student_name", nullable = false)
-    private String name;
+    @Column(nullable = false)
+    private String fullName;
 
     @Column(unique = true, nullable = false)
     private String rollNo;
 
-    @OneToOne
-    @MapsId
+    @JsonBackReference
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    private String department;
+    private String batch;
 
-    @JsonBackReference
-    @ManyToMany(mappedBy = "students")
-    private Set<Subject> subjects = new HashSet<>();
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AttendanceRecord> records = new ArrayList<>();
 }

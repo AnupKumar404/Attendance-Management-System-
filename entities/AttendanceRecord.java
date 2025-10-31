@@ -30,11 +30,11 @@ public class AttendanceRecord {
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="student_id")
+    @JoinColumn(name="user_id")
     private Student student;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attendance_session_id")
-    private AttendanceSession session;
+    @JoinColumn(name = "session_id")
+    private Session session;
 }

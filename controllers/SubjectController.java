@@ -22,11 +22,6 @@ public class SubjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(subjectService.createSubject(dto));
     }
 
-    @PostMapping("/{subjectId}/{studentId}")
-    public ResponseEntity<SubjectDTO> addStudentToSubject(@PathVariable Long subjectId, @PathVariable Long studentId){
-        return new ResponseEntity<>(subjectService.addStudentToSubject(subjectId, studentId), HttpStatus.CREATED);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<SubjectDTO> getSubject(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(subjectService.getSubjectById(id));

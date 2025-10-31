@@ -6,9 +6,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class AttendanceSessionDTO {
-    private Long id;
     private LocalDateTime sessionDate;
-    private Long subjectId;
+    private String topic;
 
     public AttendanceSessionDTO() {
         this.sessionDate = LocalDateTime.now();

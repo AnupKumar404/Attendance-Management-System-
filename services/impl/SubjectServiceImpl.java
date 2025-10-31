@@ -11,6 +11,7 @@ import com.spring.attendanceApp.repositories.StudentRepository;
 import com.spring.attendanceApp.repositories.SubjectRepository;
 import com.spring.attendanceApp.repositories.TeacherRepository;
 import com.spring.attendanceApp.services.SubjectService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,15 @@ public class SubjectServiceImpl implements SubjectService {
     private final StudentRepository studentRepository;
     private final AttendanceSessionRepository attendanceSessionRepository;
     private final ModelMapper modelMapper;
+
     @Override
+    @Transactional
     public SubjectDTO createSubject(SubjectDTO dto) {
-        Subject subject = modelMapper.map(dto, Subject.class);
         Teacher teacher = teacherRepository.findById(dto.getTeacherId())
-                .orElseThrow(() -> new RuntimeException("Teacher Not Found"));
+                .orElseThrow();
+        Subject subject = modelMapper.map(dto, Subject.class);
         subject.setTeacher(teacher);
+//        teacher.setSubjects((List<Subject>) subject);
         Subject saved = subjectRepository.save(subject);
         return modelMapper.map(saved, SubjectDTO.class);
     }
@@ -51,35 +55,5 @@ public class SubjectServiceImpl implements SubjectService {
         return subjectRepository.findAll().stream()
                 .map(subject -> modelMapper.map(subject, SubjectDTO.class))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public SubjectDTO addStudentToSubject(Long subjectId, Long studentId) {
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow();
-
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow();
-
-        if(subject.getStudents() == null){
-            subject.setStudents(new ArrayList<>());
-        }
-        subject.getStudents().add(student);
-        Subject saved = subjectRepository.save(subject);
-        return modelMapper.map(saved, SubjectDTO.class);
-    }
-
-    @Override
-    public List<StudentDTO> getStudentsBySubject(Long subjectId) {
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow();
-
-        return subject.getStudents().stream().map(s -> modelMapper.map(s, StudentDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<AttendanceSessionDTO> getSessionsBySubject(Long subjectId) {
-        return List.of();
     }
 }

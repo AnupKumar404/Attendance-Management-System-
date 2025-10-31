@@ -2,7 +2,7 @@ package com.spring.attendanceApp.services.impl;
 
 import com.spring.attendanceApp.dtos.AttendanceRecordDTO;
 import com.spring.attendanceApp.entities.AttendanceRecord;
-import com.spring.attendanceApp.entities.AttendanceSession;
+import com.spring.attendanceApp.entities.Session;
 import com.spring.attendanceApp.entities.Student;
 import com.spring.attendanceApp.enums.AttendanceStatus;
 import com.spring.attendanceApp.repositories.AttendanceRecordRepository;
@@ -15,7 +15,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +34,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public List<AttendanceRecordDTO> markAttendance(Long sessionId, List<AttendanceRecordDTO> records) {
-        AttendanceSession session = attendanceSessionRepository.findById(sessionId)
+        Session session = attendanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
 
         List<AttendanceRecord> savedRecords = records.stream().map(dto -> {

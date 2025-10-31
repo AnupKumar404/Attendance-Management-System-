@@ -18,7 +18,6 @@ public class AttendanceSessionController {
     private final AttendanceSessionService attendanceSessionService;
 
     @PostMapping("/subject/{subjectId}")
-    @PreAuthorize("hasAuthority('TEACHER')")
     public ResponseEntity<AttendanceSessionDTO> createSession(@PathVariable Long subjectId,
                                                               @RequestBody AttendanceSessionDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -26,7 +25,6 @@ public class AttendanceSessionController {
     }
 
     @GetMapping("get/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
     public ResponseEntity<AttendanceSessionDTO> getSession(@PathVariable Long id){
         return ResponseEntity.ok(attendanceSessionService.getSessionById(id));
     }

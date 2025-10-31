@@ -11,5 +11,5 @@ public class TeacherResponseDto {
 
     private String fullName;
 
-    private Role roles;
+    private Set<Role> roles;
 }

@@ -1,16 +1,14 @@
-package com.spring.attendanceApp.security;
+package com.spring.attendanceApp.utils;
 
 import com.spring.attendanceApp.entities.User;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -24,15 +22,17 @@ public class JwtProvider {
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // ✅ Generate token with username
     // Generate JWT
     public String generateToken(User user) {
         return Jwts.builder()
                 .subject(user.getUsername())
-                .claim("userId: ", user.getId().toString())
+                .claim("roles ", user.getRoles())
+                .id(user.getId().toString())
+                .header().empty().add("typ", "JWT")
+                .and()
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey())
@@ -49,23 +49,29 @@ public class JwtProvider {
         }
     }
 
-//    // ✅ Extract all claims
-//    private Claims extractAllClaims(String token) {
-//        return Jwts.parser()
-//                .verifyWith(getSigningKey())
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload();
-//    }
-
-    // Extract username
-    public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser()
+    // Extract all claims
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claims.getSubject();
     }
-    
+
+    // Extract username
+    public String extractUsername(String token){
+        return extractAllClaims(token).getSubject();
+    }
+
+    public Date extractExpiration(String token){
+        return extractAllClaims(token).getExpiration();
+    }
+
+    public boolean isTokenExpired(String token){
+        return extractExpiration(token).before(new Date());
+    }
+
+    public boolean validateExpiry(String token){
+        return !isTokenExpired(token);
+    }
 }

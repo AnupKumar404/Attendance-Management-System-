@@ -21,25 +21,18 @@ public class Subject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "subject_name")
     private String name;
 
+    @Column(name = "subject_code")
     private String code;
 
     @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacher_id")
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
-
-
-    @ManyToMany
-    @JoinTable(
-            name = "subject_students",
-            joinColumns = @JoinColumn(name = "subject_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private List<Student> students = new ArrayList<>();
 
     @JsonManagedReference
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-    private List<AttendanceSession> attendanceSessions = new ArrayList<>();
+    private List<Session> sessions = new ArrayList<>();
 }

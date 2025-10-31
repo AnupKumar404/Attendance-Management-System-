@@ -9,7 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JwtResponseDto {
     private String token;
-//    private String tokenType = "Bearer";
-    private Long userId;
     private String username;
 }
