@@ -27,7 +27,7 @@ public class UserController {
         return new ResponseEntity<>(userService.registerStudent(req), HttpStatus.CREATED);
     }
 
-    @GetMapping("/get{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id){
         return ResponseEntity.ok(userService.getUserById(id));
     }

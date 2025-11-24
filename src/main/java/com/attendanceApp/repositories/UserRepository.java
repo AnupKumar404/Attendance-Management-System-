@@ -13,6 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.username = :username")
     Optional<User> findByUsername(String username);
     boolean existsByUsername(String username);
-//    @Query(value = "SELECT * FROM Users LEFT JOIN Student ON Users.id = Student.user_id", nativeQuery = true)
-//    List<User> findAllUsers();
+    @Query(value = "SELECT u.id, u.username, s.roll_no FROM users u JOIN student s ON s.user_id = u.id", nativeQuery = true)
+    List<User> findAllUsers();
 }

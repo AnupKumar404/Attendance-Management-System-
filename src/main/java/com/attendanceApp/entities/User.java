@@ -28,13 +28,13 @@ public class User{
 
     private String fullName;
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private Student student;
-
-    @JsonIgnore
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private Teacher teacher;
+//    @JsonIgnore
+//    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+//    private Student student;
+//
+//    @JsonIgnore
+//    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+//    private Teacher teacher;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")

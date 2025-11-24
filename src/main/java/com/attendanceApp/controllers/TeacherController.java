@@ -1,6 +1,8 @@
 package com.attendanceApp.controllers;
 
+import com.attendanceApp.dtos.RegisterTeacherRequestDto;
 import com.attendanceApp.dtos.TeacherDTO;
+import com.attendanceApp.dtos.TeacherResponseDto;
 import com.attendanceApp.services.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,11 @@ public class TeacherController {
     @PostMapping
     public ResponseEntity<TeacherDTO> createTeacher(@RequestBody TeacherDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(teacherService.createTeacher(dto));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<TeacherResponseDto> registerTeacher(@RequestBody RegisterTeacherRequestDto dto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(teacherService.registerTeacher(dto));
     }
 
     @GetMapping("/{id}")

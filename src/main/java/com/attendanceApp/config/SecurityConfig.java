@@ -53,14 +53,21 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/users/**").permitAll()
-                        .requestMatchers( "/api/teachers/**", "/api/attendance/mark/**")
+                        .requestMatchers("/api/auth/**",
+                                "/api/users/**").permitAll()
+
+                        .requestMatchers( "/api/teachers/**",
+                                "/api/attendance/mark/**")
                         .hasRole(Role.TEACHER.name())
-                        .requestMatchers("/api/students/**", "/api/subjects/**", "/api/attendanceSession/**")
+
+                        .requestMatchers("/api/students/**", "/api/subjects/**",
+                                "/api/attendanceSession/**", "/api/mail/**")
                         .hasAnyRole(Role.TEACHER.name(), Role.STUDENT.name())
+
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

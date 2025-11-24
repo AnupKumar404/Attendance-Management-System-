@@ -15,6 +15,7 @@ import com.attendanceApp.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class TeacherServicesImpl implements TeacherService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepo;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public TeacherDTO createTeacher(TeacherDTO dto) {
@@ -36,25 +38,29 @@ public class TeacherServicesImpl implements TeacherService {
         return modelMapper.map(saved, TeacherDTO.class);
     }
 
-//    @Override
-//    @Transactional
-//    public TeacherResponseDto registerTeacher(RegisterTeacherRequestDto dto){
-//        if(userRepo.existsByUsername(dto.getUsername())){
-//            throw new DuplicateResourceException("Already exists");
-//        }
-//
-//        User user = userService.
-//
-//        Teacher teacher = Teacher.builder()
-//                .fullName(dto.getFullName())
-//                .department(dto.getDepartment())
-//                .build();
-//
-//        user.setTeacher(teacher);
-//        userRepo.save(user);
-//
-//        return modelMapper.map(user, TeacherResponseDto.class);
-//    }
+    @Transactional
+    @Override
+    public TeacherResponseDto registerTeacher(RegisterTeacherRequestDto dto){
+        if(userRepo.existsByUsername(dto.getUsername())){
+            throw new DuplicateResourceException("Already exists");
+        }
+
+        User user = User.builder()
+                .username(dto.getUsername())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .fullName(dto.getFullName())
+                .roles(Set.of(Role.TEACHER))
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .fullName(dto.getFullName())
+                .department(dto.getDepartment())
+                .build();
+
+        userRepo.save(user);
+
+        return modelMapper.map(user, TeacherResponseDto.class);
+    }
 
     @Override
     public TeacherDTO getTeacherById(Long id) {

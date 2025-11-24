@@ -10,7 +10,9 @@ import com.attendanceApp.repositories.UserRepository;
 import com.attendanceApp.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -29,7 +32,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Cacheable(cacheNames = "Users", key = "#id")
     public UserDto getUserById(Long id) {
+        log.info("User fetch with id: {}", id);
       User user = userRepo.findById(id)
               .orElseThrow(() -> new ResourceNotFoundException("User with id "+id+" not found"));
 
@@ -75,7 +80,6 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         student.setUser(user);
-        user.setStudent(student);
         userRepo.save(user);
 
         return modelMapper.map(student, StudentDTO.class);
@@ -103,7 +107,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers(){
-       return userRepo.findAll()
+       return userRepo.findAllUsers()
                .stream().map(user -> modelMapper.map(user, UserDto.class))
                .collect(Collectors.toList());
     }

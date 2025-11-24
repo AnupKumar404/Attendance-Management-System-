@@ -14,14 +14,14 @@ import java.nio.file.AccessDeniedException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException
             (ResourceNotFoundException  exception, HttpServletRequest req)
     {
         log.warn("Not found: {}", exception.getMessage());
 
         ErrorResponse error = new ErrorResponse
                 (HttpStatus.NOT_FOUND.value(),
-                        "Not Found",
+                        "Not_Found",
                         exception.getMessage(),
                         req.getRequestURI());
 
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
             (Exception exception, HttpServletRequest req){
         ErrorResponse error = new ErrorResponse
                 (HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Internal Server Error",
+                        "Internal_Server_Error",
                         exception.getMessage(),
                         req.getRequestURI());
 
@@ -66,10 +66,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(Exception exception, HttpServletRequest req){
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException exception, HttpServletRequest req){
 
         ErrorResponse errorResponse = new ErrorResponse
-                (HttpStatus.BAD_REQUEST.value(), "Bad request",
+                (HttpStatus.BAD_REQUEST.value(), "Bad_Request",
                         exception.getMessage(), req.getRequestURI());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
