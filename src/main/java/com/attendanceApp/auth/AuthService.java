@@ -6,6 +6,7 @@ import com.attendanceApp.entities.Teacher;
 import com.attendanceApp.enums.Role;
 import com.attendanceApp.exceptions.BadRequestException;
 import com.attendanceApp.exceptions.DuplicateResourceException;
+import com.attendanceApp.services.EmailService;
 import com.attendanceApp.utils.JwtProvider;
 import com.attendanceApp.entities.User;
 import com.attendanceApp.repositories.UserRepository;

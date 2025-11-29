@@ -1,14 +1,11 @@
 package com.attendanceApp.services;
 
-import com.attendanceApp.dtos.EmailSendDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -18,18 +15,17 @@ public class EmailService {
     private JavaMailSender javaMailSender;
 
     @Async
-    public CompletableFuture<String> sendEmail(EmailSendDto dto){
+    public void sendEmail(String username){
 
         try {
             SimpleMailMessage mail = new SimpleMailMessage();
-            mail.setTo(dto.to);
-            mail.setSubject(dto.subject);
-            mail.setText(dto.body);
+            mail.setTo(username);
+            mail.setSubject("Welcome to attendance management system!");
+            mail.setText("Hey, "+username+" welcome to this platform where management became ease at your fingertips...");
             javaMailSender.send(mail);
-            log.info("send email successfully");
-            return CompletableFuture.completedFuture("Sent Email");
+            log.info("Email sent successfully.....");
         }catch (Exception e){
-            return CompletableFuture.completedFuture("error "+e.getMessage());
+            log.error("error_"+e.getMessage());
         }
     }
 }

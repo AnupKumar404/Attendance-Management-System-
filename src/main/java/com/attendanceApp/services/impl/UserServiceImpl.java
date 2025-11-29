@@ -7,6 +7,7 @@ import com.attendanceApp.enums.Role;
 import com.attendanceApp.exceptions.DuplicateResourceException;
 import com.attendanceApp.exceptions.ResourceNotFoundException;
 import com.attendanceApp.repositories.UserRepository;
+import com.attendanceApp.services.EmailService;
 import com.attendanceApp.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final EmailService emailService;
 
     @Override
     @Cacheable(cacheNames = "Users", key = "#id")
@@ -81,6 +84,8 @@ public class UserServiceImpl implements UserService {
 
         student.setUser(user);
         userRepo.save(user);
+
+        emailService.sendEmail(dto.getUsername());
 
         return modelMapper.map(student, StudentDTO.class);
     }
