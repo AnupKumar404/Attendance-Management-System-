@@ -1,0 +1,53 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/attendanceDB
+    username: ${username}
+    password: ${password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: anup67904@gmail.com
+    password: tlquqbxbekpqtqtt
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+#          connection timeout: 3000
+#          timeout: 3000
+#          write_timeout: 3000
+#          pool:
+#            size: 3
+#          quitwait: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: true
+
+jwt:
+  secret: d+pUjdH/UE19pc19teV9zZWNyZXRfYmFzZTY0hU%%%P#nhsk/&ius*lp%qwe$pubg&ghy&ZHY&bnm*csv&urt
+  expiration-ms: 60000
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG
+        data-jpa: DEBUG
+
+    com:
+      spring:
+        attendanceApp: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, beans, shutdown
