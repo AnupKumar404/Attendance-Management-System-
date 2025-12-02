@@ -15,17 +15,17 @@ public class EmailService {
     private JavaMailSender javaMailSender;
 
     @Async
-    public void sendEmail(String username){
+    public void sendEmail(String username, String fullName){
 
         try {
             SimpleMailMessage mail = new SimpleMailMessage();
             mail.setTo(username);
             mail.setSubject("Welcome to attendance management system!");
-            mail.setText("Hey, "+username+" welcome to this platform where management became ease at your fingertips...");
+            mail.setText("Hey, "+fullName+"! Welcome to this platform where management became ease at your fingertips...");
             javaMailSender.send(mail);
             log.info("Email sent successfully.....");
         }catch (Exception e){
-            log.error("error_"+e.getMessage());
+            log.error(e.getMessage());
         }
     }
 }

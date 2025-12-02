@@ -3,6 +3,7 @@ package com.attendanceApp.services;
 import com.attendanceApp.dtos.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -17,4 +18,6 @@ public interface UserService {
     void deleteUserById(Long id);
 
     List<UserDto> getAllUsers();
+
+    UserDto updatePartial(Long id, Map<String, Object> updateValue);
 }

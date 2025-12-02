@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({InvalidJwtException.class, AccessDeniedException.class})
+    @ExceptionHandler(InvalidJwtException.class)
     public ResponseEntity<ErrorResponse> authenticationException
             (InvalidJwtException  authenticationException, HttpServletRequest req)
     {
@@ -37,6 +37,19 @@ public class GlobalExceptionHandler {
                         , "Unauthorized",
                         authenticationException.getMessage()
                 , req.getRequestURI());
+
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ErrorResponse> expiredTokenException
+            (ExpiredJwtException  Exception, HttpServletRequest req)
+    {
+        ErrorResponse error = new ErrorResponse
+                (HttpStatus.UNAUTHORIZED.value()
+                        , "Unauthorized",
+                        Exception.getMessage()
+                        , req.getRequestURI());
 
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }

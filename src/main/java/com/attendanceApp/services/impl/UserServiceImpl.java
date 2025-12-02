@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,6 @@ public class UserServiceImpl implements UserService {
 
       return modelMapper.map(user, UserDto.class);
     }
-
 
     @Override
     public UserDto registerUser(UserDto dto) {
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
         student.setUser(user);
         userRepo.save(user);
 
-        emailService.sendEmail(dto.getUsername());
+        emailService.sendEmail(dto.getUsername(), dto.getFullName());
 
         return modelMapper.map(student, StudentDTO.class);
     }
@@ -112,12 +112,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers(){
-       return userRepo.findAllUsers()
+       return userRepo.findAll()
                .stream().map(user -> modelMapper.map(user, UserDto.class))
                .collect(Collectors.toList());
     }
 
-    public UserDto getUserByUserName(String name){
+    @Override
+    public UserDto updatePartial(Long id, Map<String, Object> updateValue) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+
+        updateValue.forEach((key, value) -> {
+            switch(key){
+                case "username":
+                    user.setUsername((String) value);
+                    break;
+
+                case "full_name":
+                    user.setFullName((String) value);
+                    break;
+
+                case "password":
+                    user.setPassword((String) value);
+                    break;
+
+                default:
+                    log.info("Invalid key..!");
+            }
+        });
+
+        userRepo.save(user);
+        return modelMapper.map(user, UserDto.class);
+    }
+
+    public UserDto getUserByUsername(String name){
         User getUser = userRepo.findByUsername(name)
                 .orElseThrow(() -> new ResourceNotFoundException(name+" doesn't exists!"));
 

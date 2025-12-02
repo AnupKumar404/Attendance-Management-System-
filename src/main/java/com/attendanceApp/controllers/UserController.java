@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,10 +39,16 @@ public class UserController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping("/modify/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id,@Valid @RequestBody UserDto user){
         return new ResponseEntity<>(userService.updateExistingUser(id, user), HttpStatus.OK);
     }
+
+    @PatchMapping("/patch/{id}")
+    public ResponseEntity<UserDto> updateUserPartial(@PathVariable Long id, @Valid @RequestBody Map<String, Object> dto){
+        return new ResponseEntity<>(userService.updatePartial(id, dto), HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/del/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id){
@@ -50,7 +57,7 @@ public class UserController {
     }
 
     @GetMapping("/getBy")
-    public ResponseEntity<UserDto> getUserByUserName(@RequestParam String username){
-        return ResponseEntity.ok(userService.getUserByUserName(username));
+    public ResponseEntity<UserDto> getUserByUsername(@RequestParam String username){
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 }

@@ -1,6 +1,7 @@
 package com.attendanceApp.utils;
 
 import com.attendanceApp.auth.CustomUserDetailsService;
+import com.attendanceApp.exceptions.ExpiredJwtException;
 import com.attendanceApp.exceptions.InvalidJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
-    private final HandlerExceptionResolver handlerExceptionResolver;
+//    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -33,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        try {
+
 
             log.info("incoming request:  {}", request.getRequestURI());
 
@@ -44,27 +45,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            try {
 
-            String token = authHeader.split("Bearer ")[1];
-            String username = jwtProvider.extractUsername(token);
+                String token = authHeader.split("Bearer ")[1];
+                String username = jwtProvider.extractUsername(token);
 
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                if (jwtProvider.validateToken(token) && jwtProvider.validateExpiry(token)) {
+                    if (!jwtProvider.validateToken(token)) {
+                        throw new InvalidJwtException("Token is Invalid");
+                    }
+
+                    if(!jwtProvider.validateExpiry(token)){
+                        throw new ExpiredJwtException("Token Expired");
+                    }
+
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                }else{
-                    throw new InvalidJwtException("JWT token is expired or invalid");
                 }
+                filterChain.doFilter(request, response);
+            }catch (ExpiredJwtException e){
+                throw new ExpiredJwtException("Token Expired");
             }
-            filterChain.doFilter(request, response);
-
-        }catch(Exception ex){
-            handlerExceptionResolver.resolveException(request, response, null, ex);
-        }
     }
 }

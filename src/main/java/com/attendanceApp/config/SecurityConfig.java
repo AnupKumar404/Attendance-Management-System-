@@ -1,6 +1,7 @@
 package com.attendanceApp.config;
 
 import com.attendanceApp.enums.Role;
+import com.attendanceApp.utils.JwtAuthEntryPoint;
 import com.attendanceApp.utils.JwtAuthenticationFilter;
 import com.attendanceApp.utils.JwtProvider;
 import com.attendanceApp.auth.CustomUserDetailsService;
@@ -27,7 +28,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtProvider jwtProvider;
-    private final HandlerExceptionResolver handlerExceptionResolver;
+    private final JwtAuthEntryPoint entryPoint;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -41,7 +42,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtProvider, userDetailsService, handlerExceptionResolver);
+        return new JwtAuthenticationFilter(jwtProvider, userDetailsService);
     }
 
     @Bean
@@ -51,6 +52,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exc -> exc.authenticationEntryPoint(entryPoint))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**",
@@ -61,7 +63,7 @@ public class SecurityConfig {
                         .hasRole(Role.TEACHER.name())
 
                         .requestMatchers("/api/students/**", "/api/subjects/**",
-                                "/api/attendanceSession/**", "/api/mail/**")
+                                "/api/attendanceSession/**", "/actuator/**")
                         .hasAnyRole(Role.TEACHER.name(), Role.STUDENT.name())
 
                         .anyRequest().authenticated()
