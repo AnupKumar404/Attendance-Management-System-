@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "student")
+@Table(name = "students")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -31,6 +31,7 @@ public class Student {
     @JsonIgnore
     private User user;
 
+    @Column(nullable = false)
     private String batch;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -3,6 +3,7 @@ package com.attendanceApp.services.impl;
 import com.attendanceApp.dtos.StudentDTO;
 import com.attendanceApp.entities.Student;
 import com.attendanceApp.exceptions.ResourceNotFoundException;
+import com.attendanceApp.projections.StudentProjection;
 import com.attendanceApp.repositories.StudentRepository;
 import com.attendanceApp.services.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDTO getStudentById(Long id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(()
-                        -> new ResourceNotFoundException("Student with id "+id+" not found"));
+        StudentProjection student = studentRepository.findStudentById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student with id "+id+" not found"));
+
         return modelMapper.map(student, StudentDTO.class);
     }
 
@@ -40,5 +41,10 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.findAll().stream()
                 .map(stu -> modelMapper.map(stu, StudentDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    public StudentProjection getStudentByRollNo(String rollNo){
+        return studentRepository.findByRollNo(rollNo)
+                .orElseThrow(() -> new ResourceNotFoundException("student not found"));
     }
 }

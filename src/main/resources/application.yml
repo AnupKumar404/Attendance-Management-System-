@@ -1,10 +1,22 @@
+#spring:
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/attendanceDB
+#    username: ${username}
+#    password: ${password}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/attendanceDB
-    username: ${username}
-    password: ${password}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://localhost:5432/attendancedb
+    username: postgres
+    password: database@2026
+    driver-class-name: org.postgresql.Driver
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: true
 
   mail:
     host: smtp.gmail.com
@@ -24,15 +36,16 @@ spring:
 #            size: 3
 #          quitwait: false
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    open-in-view: true
-
 jwt:
   secret: d+pUjdH/UE19pc19teV9zZWNyZXRfYmFzZTY0hU%%%P#nhsk/&ius*lp%qwe$pubg&ghy&ZHY&bnm*csv&urt
-  expiration-ms: 60000
+  expiration-ms: 600000
+
+server:
+  port: 8000
+
+app:
+  source:
+    frontend-url: "http://localhost:5173"
 
 logging:
   level:

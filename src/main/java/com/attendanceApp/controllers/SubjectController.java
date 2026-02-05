@@ -2,6 +2,7 @@ package com.attendanceApp.controllers;
 
 import com.attendanceApp.dtos.SubjectDTO;
 import com.attendanceApp.services.SubjectService;
+import com.attendanceApp.services.impl.SubjectServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/subjects")
+@RequestMapping("/api/v1/subjects")
 @RequiredArgsConstructor
 public class SubjectController {
 
-    private final SubjectService subjectService;
+    private final SubjectServiceImpl subjectService;
 
     @PostMapping
     public ResponseEntity<SubjectDTO> createSubject(@RequestBody SubjectDTO dto){

@@ -15,7 +15,4 @@ public class MapperConfig {
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
         return mapper;
     }
-//    public ModelMapper modelMapper(){
-//        return new ModelMapper();
-//    }
 }

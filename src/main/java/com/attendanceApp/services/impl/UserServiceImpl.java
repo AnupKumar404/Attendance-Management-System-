@@ -13,39 +13,32 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+@Slf4j
+public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepo;
 
-    private final ModelMapper modelMapper;
-
     private final PasswordEncoder passwordEncoder;
+
+    private final ModelMapper modelMapper;
 
     private final EmailService emailService;
 
-    @Override
-    @Cacheable(cacheNames = "Users", key = "#id")
-    public UserDto getUserById(Long id) {
-        log.info("User fetch with id: {}", id);
-      User user = userRepo.findById(id)
-              .orElseThrow(() -> new ResourceNotFoundException("User with id "+id+" not found"));
 
-      return modelMapper.map(user, UserDto.class);
-    }
-
-    @Override
+@Override
     public UserDto registerUser(UserDto dto) {
         if(userRepo.existsByUsername(dto.getUsername())){
             throw new DuplicateResourceException("Already exists");
@@ -55,7 +48,7 @@ public class UserServiceImpl implements UserService {
                 .username(dto.getUsername())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .fullName(dto.getFullName())
-                .roles(Set.of(Role.TEACHER))
+                .roles(Set.of(Role.ADMIN))
                 .build();
 
         userRepo.save(user);
@@ -78,11 +71,13 @@ public class UserServiceImpl implements UserService {
 
         Student student = Student.builder()
                 .fullName(dto.getFullName())
+                .user(user)
                 .rollNo(dto.getRollNo())
                 .batch(dto.getBatch())
                 .build();
 
         student.setUser(user);
+        user.setStudent(student);
         userRepo.save(user);
 
         emailService.sendEmail(dto.getUsername(), dto.getFullName());
@@ -90,14 +85,24 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(student, StudentDTO.class);
     }
 
+    @Override
+    public UserDto getUserById(Long id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return modelMapper.map(user, UserDto.class);
+    }
+
 
     @Override
     public UserDto updateExistingUser(Long id, UserDto updatedUser) {
         User existingUser = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("user with id "+id+" doesn't exists!"));
+                .orElseThrow(() -> new
+                        ResourceNotFoundException("user with id "+id+" doesn't exists!"));
 
         existingUser.setUsername(updatedUser.getUsername());
-        existingUser.setPassword(updatedUser.getPassword());
+        existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        existingUser.setFullName(updatedUser.getFullName());
 
         User newUpdatedUser = userRepo.save(existingUser);
         return modelMapper.map(newUpdatedUser, UserDto.class);
@@ -106,15 +111,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(Long id) {
         userRepo.findById(id)
-                       .orElseThrow(() -> new ResourceNotFoundException("user with id "+id+" doesn't exists!"));
+                       .orElseThrow(() -> new
+                               ResourceNotFoundException("user with id "+id+" doesn't exists!"));
        userRepo.deleteById(id);
     }
 
     @Override
-    public List<UserDto> getAllUsers(){
-       return userRepo.findAll()
-               .stream().map(user -> modelMapper.map(user, UserDto.class))
-               .collect(Collectors.toList());
+    public Page<UserDto> getAllUsers(){
+        Pageable pageable = PageRequest.of(0, 20);
+        return userRepo.findAll(pageable)
+                .map((element) -> modelMapper.map(element, UserDto.class));
     }
 
     @Override
@@ -128,12 +134,12 @@ public class UserServiceImpl implements UserService {
                     user.setUsername((String) value);
                     break;
 
-                case "full_name":
+                case "fullName":
                     user.setFullName((String) value);
                     break;
 
                 case "password":
-                    user.setPassword((String) value);
+                    user.setPassword(passwordEncoder.encode((String) value));
                     break;
 
                 default:
@@ -145,9 +151,17 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserDto.class);
     }
 
-    public UserDto getUserByUsername(String name){
-        User getUser = userRepo.findByUsername(name)
-                .orElseThrow(() -> new ResourceNotFoundException(name+" doesn't exists!"));
+    public UserDto getUserByName(String name){
+
+        String finalName = Arrays.stream(name.split("\\s"))
+                .map(word -> Character.toTitleCase(word.charAt(0))
+                        + word.substring(1))
+                .collect(Collectors.joining(" "));
+
+
+        User getUser = userRepo.findByFullname(finalName)
+                .orElseThrow(() -> new
+                        ResourceNotFoundException(finalName+" doesn't exists!"));
 
         return modelMapper.map(getUser, UserDto.class);
     }

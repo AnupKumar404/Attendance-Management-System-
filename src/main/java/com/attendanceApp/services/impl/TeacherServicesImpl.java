@@ -3,6 +3,7 @@ package com.attendanceApp.services.impl;
 import com.attendanceApp.dtos.RegisterTeacherRequestDto;
 import com.attendanceApp.dtos.TeacherDTO;
 import com.attendanceApp.dtos.TeacherResponseDto;
+import com.attendanceApp.entities.Student;
 import com.attendanceApp.entities.Teacher;
 import com.attendanceApp.entities.User;
 import com.attendanceApp.enums.Role;
@@ -57,9 +58,11 @@ public class TeacherServicesImpl implements TeacherService {
                 .department(dto.getDepartment())
                 .build();
 
+        teacher.setUser(user);
+        user.setTeacher(teacher);
         userRepo.save(user);
 
-        return modelMapper.map(user, TeacherResponseDto.class);
+        return modelMapper.map(teacher, TeacherResponseDto.class);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class TeacherServicesImpl implements TeacherService {
 
     @Override
     public List<TeacherDTO> getAllTeachers() {
-        return teacherRepository.findAll().stream()
+        return teacherRepository.findAllTeachers().stream()
                 .map(teacher -> modelMapper.map(teacher, TeacherDTO.class)).toList();
     }
 }

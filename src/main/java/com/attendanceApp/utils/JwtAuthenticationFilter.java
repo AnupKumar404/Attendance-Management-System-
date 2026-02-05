@@ -1,7 +1,6 @@
 package com.attendanceApp.utils;
 
 import com.attendanceApp.auth.CustomUserDetailsService;
-import com.attendanceApp.exceptions.ExpiredJwtException;
 import com.attendanceApp.exceptions.InvalidJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
@@ -35,41 +33,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
 
+        log.info("incoming request:  {}", request.getRequestURI());
 
-            log.info("incoming request:  {}", request.getRequestURI());
+        final String authHeader = request.getHeader("Authorization");
 
-            final String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
+
+        String token = authHeader.split("Bearer ")[1];
+        String username = jwtProvider.extractUsername(token);
+
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (jwtProvider.validateToken(token) && jwtProvider.validateExpiry(token)) {
+
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
-
-            try {
-
-                String token = authHeader.split("Bearer ")[1];
-                String username = jwtProvider.extractUsername(token);
-
-
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                    if (!jwtProvider.validateToken(token)) {
-                        throw new InvalidJwtException("Token is Invalid");
-                    }
-
-                    if(!jwtProvider.validateExpiry(token)){
-                        throw new ExpiredJwtException("Token Expired");
-                    }
-
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
-                filterChain.doFilter(request, response);
-            }catch (ExpiredJwtException e){
-                throw new ExpiredJwtException("Token Expired");
-            }
+        }
+        filterChain.doFilter(request, response);
     }
 }

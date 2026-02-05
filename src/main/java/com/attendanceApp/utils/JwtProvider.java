@@ -1,6 +1,7 @@
 package com.attendanceApp.utils;
 
 import com.attendanceApp.auth.UserPrincipal;
+import com.attendanceApp.exceptions.InvalidJwtException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,9 @@ public class JwtProvider {
     private String jwtSecret;
 
     @Value("${jwt.expiration-ms}")
-    private long jwtExpirationMs;
+    private long jwtExpiration;
 
-    // Secret Key for Digital Signature
+    // Digitally signed with secret key using cryptography
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
@@ -34,8 +35,8 @@ public class JwtProvider {
                 .header().empty().add("typ", "JWT")
                 .and()
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -44,7 +45,7 @@ public class JwtProvider {
         try {
             Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token);
             return true;
-        } catch (Exception e) {
+        } catch (InvalidJwtException e) {
             return false;
         }
     }
@@ -63,14 +64,17 @@ public class JwtProvider {
         return extractAllClaims(token).getSubject();
     }
 
+    // Extract expiration time
     public Date extractExpiration(String token){
         return extractAllClaims(token).getExpiration();
     }
 
+    // Check expiration of token
     public boolean isTokenExpired(String token){
         return extractExpiration(token).before(new Date());
     }
 
+    // Validate the expiry of token
     public boolean validateExpiry(String token){
         return !isTokenExpired(token);
     }

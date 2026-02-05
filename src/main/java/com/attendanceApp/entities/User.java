@@ -1,7 +1,7 @@
 package com.attendanceApp.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.attendanceApp.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,13 +28,17 @@ public class User{
 
     private String fullName;
 
-//    @JsonIgnore
-//    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-//    private Student student;
-//
-//    @JsonIgnore
-//    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-//    private Teacher teacher;
+
+    @OneToOne(mappedBy = "user",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, optional = false)
+    @JsonIgnore
+    private Student student;
+
+
+    @OneToOne(mappedBy = "user",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, optional = false)
+    @JsonIgnore
+    private Teacher teacher;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")

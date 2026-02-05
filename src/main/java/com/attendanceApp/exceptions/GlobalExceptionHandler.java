@@ -4,10 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.nio.file.AccessDeniedException;
 
 @Slf4j
 @RestControllerAdvice
@@ -28,6 +27,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException
+            (MethodArgumentNotValidException exception, HttpServletRequest req)
+    {
+        log.warn("Not Valid: {}", exception.getMessage());
+
+        ErrorResponse error = new ErrorResponse
+                (HttpStatus.BAD_REQUEST.value(),
+                        "Invalid_Input",
+                        exception.getMessage(),
+                        req.getRequestURI());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(InvalidJwtException.class)
     public ResponseEntity<ErrorResponse> authenticationException
             (InvalidJwtException  authenticationException, HttpServletRequest req)
@@ -41,21 +55,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ErrorResponse> expiredTokenException
-            (ExpiredJwtException  Exception, HttpServletRequest req)
-    {
-        ErrorResponse error = new ErrorResponse
-                (HttpStatus.UNAUTHORIZED.value()
-                        , "Unauthorized",
-                        Exception.getMessage()
-                        , req.getRequestURI());
-
-        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-    }
-
     @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchElementException(DuplicateResourceException exception
+    public ResponseEntity<ErrorResponse> handleDuplicateElementException(DuplicateResourceException exception
     , HttpServletRequest request){
         ErrorResponse error = new ErrorResponse
                 (HttpStatus.CONFLICT.value(),
@@ -67,7 +68,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> randomException
+    public ResponseEntity<ErrorResponse> generalException
             (Exception exception, HttpServletRequest req){
         ErrorResponse error = new ErrorResponse
                 (HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -76,15 +77,5 @@ public class GlobalExceptionHandler {
                         req.getRequestURI());
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException exception, HttpServletRequest req){
-
-        ErrorResponse errorResponse = new ErrorResponse
-                (HttpStatus.BAD_REQUEST.value(), "Bad_Request",
-                        exception.getMessage(), req.getRequestURI());
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

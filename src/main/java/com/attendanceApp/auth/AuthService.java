@@ -20,14 +20,14 @@ public class AuthService {
     //Business logic of Login
     public JwtResponseDto login(LoginRequest req) throws AuthenticationException {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
-        );
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
+            );
 
-        UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
+            UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
 
-        String token = jwtProvider.generateToken(user);
+            String token = jwtProvider.generateToken(user);
 
-        return new JwtResponseDto(token, user.getUsername(), user.getRoles().toString());
+            return new JwtResponseDto(token, user.getUsername(), user.getRoles().toString());
+        }
     }
-}

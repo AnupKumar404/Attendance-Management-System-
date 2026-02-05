@@ -1,6 +1,7 @@
 package com.attendanceApp.services;
 
 import com.attendanceApp.dtos.StudentDTO;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 

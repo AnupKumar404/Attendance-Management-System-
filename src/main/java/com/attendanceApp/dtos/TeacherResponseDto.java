@@ -7,9 +7,8 @@ import java.util.Set;
 
 @Data
 public class TeacherResponseDto {
-    private String username;
 
     private String fullName;
 
-    private Set<Role> roles;
+    private String department;
 }

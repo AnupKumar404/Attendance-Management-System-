@@ -1,9 +1,11 @@
 package com.attendanceApp.controllers;
 
 import com.attendanceApp.dtos.*;
+import com.attendanceApp.entities.User;
 import com.attendanceApp.services.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
@@ -28,36 +30,36 @@ public class UserController {
         return new ResponseEntity<>(userService.registerStudent(req), HttpStatus.CREATED);
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id){
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping("/get")
-    public ResponseEntity<List<UserDto>> getAll(){
+    @GetMapping()
+    public ResponseEntity<Page<UserDto>> getAll(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
 
-    @PutMapping("/modify/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id,@Valid @RequestBody UserDto user){
         return new ResponseEntity<>(userService.updateExistingUser(id, user), HttpStatus.OK);
     }
 
-    @PatchMapping("/patch/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<UserDto> updateUserPartial(@PathVariable Long id, @Valid @RequestBody Map<String, Object> dto){
         return new ResponseEntity<>(userService.updatePartial(id, dto), HttpStatus.OK);
     }
 
 
-    @DeleteMapping("/del/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id){
         userService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/getBy")
-    public ResponseEntity<UserDto> getUserByUsername(@RequestParam String username){
-        return ResponseEntity.ok(userService.getUserByUsername(username));
+    @GetMapping("/user")
+    public ResponseEntity<UserDto> getUserByName(@RequestParam String name){
+        return ResponseEntity.ok(userService.getUserByName(name));
     }
 }
