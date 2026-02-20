@@ -1,9 +1,10 @@
 package com.attendanceApp.utils;
 
 import com.attendanceApp.auth.CustomUserDetailsService;
-import com.attendanceApp.exceptions.InvalidJwtException;
+import com.attendanceApp.auth.UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -14,8 +15,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @Slf4j
@@ -35,29 +38,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.info("incoming request:  {}", request.getRequestURI());
 
-        final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String token = extractToken(request);
 
+        if(token != null){
 
-        String token = authHeader.split("Bearer ")[1];
-        String username = jwtProvider.extractUsername(token);
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
+                String username = jwtProvider.extractUsername(token);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtProvider.validateToken(token) && jwtProvider.validateExpiry(token)) {
+                if (jwtProvider.validateToken(token) && jwtProvider.validateExpiry(token)) {
 
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    jwtProvider.extractUsername(token), null, userDetails.getAuthorities());
+
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
         }
+
         filterChain.doFilter(request, response);
+    }
+
+
+    private String extractToken (HttpServletRequest request){
+        // Option A: Try to get from Cookie first (Priority)
+        Cookie cookie = WebUtils.getCookie(request, "access_token");
+        // Match your cookie name!
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+
+
+        String bearerToken = request.getHeader("Authorization");
+
+        if(bearerToken != null && bearerToken.startsWith("Bearer ")){
+            return bearerToken.split("Bearer ")[1];
+        }
+
+        return null;
     }
 }

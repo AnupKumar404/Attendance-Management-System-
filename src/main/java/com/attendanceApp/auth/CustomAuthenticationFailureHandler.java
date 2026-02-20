@@ -29,6 +29,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             errorMessage = "{\"error\": \"Authentication failed\"}";
         }
 
-        response.getOutputStream().println(errorMessage);
+        response.getWriter().write(errorMessage);
     }
 }

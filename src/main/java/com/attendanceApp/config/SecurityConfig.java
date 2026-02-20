@@ -1,7 +1,8 @@
 package com.attendanceApp.config;
 
 import com.attendanceApp.auth.CustomAuthenticationFailureHandler;
-import com.attendanceApp.enums.Role;
+import com.attendanceApp.auth.UserPrincipal;
+import com.attendanceApp.enums.UserRole;
 import com.attendanceApp.utils.JwtAuthEntryPoint;
 import com.attendanceApp.utils.JwtAuthenticationFilter;
 import com.attendanceApp.utils.JwtProvider;
@@ -20,7 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableMethodSecurity
@@ -50,26 +50,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .securityMatcher("/**")  // applies to all requests
+                .securityMatcher("/**") // applies to all requests
+
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .exceptionHandling(exc -> exc.authenticationEntryPoint(entryPoint))
+
                 .authenticationProvider(authenticationProvider())
-                .formLogin(login -> login.loginProcessingUrl("api/auth/login")
+
+                .formLogin(login -> login.loginProcessingUrl("api/v1/auth/login")
                         .failureHandler(customAuthenticationFailureHandler))
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",
-                                "/api/users/**", "/api/teachers/**").permitAll()
-
-                        .requestMatchers("/api/attendance/mark/**")
-                        .hasRole(Role.TEACHER.name())
-
-                        .requestMatchers("/api/students/**", "/api/subjects/**",
-                                "/api/attendanceSession/**", "/actuator/**")
-                        .hasAnyRole(Role.TEACHER.name(), Role.STUDENT.name())
-
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/users/**")
+                        .permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class)

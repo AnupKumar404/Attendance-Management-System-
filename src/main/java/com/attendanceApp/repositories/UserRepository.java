@@ -1,25 +1,27 @@
 package com.attendanceApp.repositories;
 
-import com.attendanceApp.entities.User;
+import com.attendanceApp.entities.Users;
+import com.attendanceApp.projections.UserProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<Users, Long> {
 
-    Optional<User> findByUsername(String username);
+    Optional<Users> findByEmail(String email);
 
-    @Query(value = "SELECT * FROM users WHERE full_name = ?", nativeQuery = true)
-    Optional<User> findByFullname(String name);
+    Optional<UserProjection> findByFullName(String name);
 
-    boolean existsByUsername(String username);
-    @Query(value = "SELECT id, username, full_name FROM users", nativeQuery = true)
-    Page<User> findAllUsers(Pageable pageable);
+    boolean existsByEmail(String username);
+
+    @Query("SELECT isActive i FROM Users u WHERE u.fullName=:name")
+    Optional<Boolean> isUserActive(String name);
+
+    @Query(value = "SELECT email, full_name, role FROM users", nativeQuery = true)
+    <T> Page<T> findAllUsers(Pageable pageable);
 }

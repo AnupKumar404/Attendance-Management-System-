@@ -1,6 +1,7 @@
 package com.attendanceApp.utils;
 
 import com.attendanceApp.auth.UserPrincipal;
+import com.attendanceApp.enums.UserRole;
 import com.attendanceApp.exceptions.InvalidJwtException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -48,6 +49,10 @@ public class JwtProvider {
         } catch (InvalidJwtException e) {
             return false;
         }
+    }
+
+    public String extractUserRole(String token){
+        return extractAllClaims(token).get("roles").toString();
     }
 
     // Extract all claims

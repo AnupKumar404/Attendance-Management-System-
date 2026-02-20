@@ -4,6 +4,8 @@ import com.attendanceApp.auth.AuthService;
 import com.attendanceApp.dtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +20,19 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponseDto> login(@Valid @RequestBody LoginRequest req) {
-        return ResponseEntity.ok(authService.login(req));
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest req) {
+
+        JwtResponseDto result = authService.login(req);
+
+        ResponseCookie cookie = ResponseCookie.from("access_token", result.token())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(10*60)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(result.role());
     }
 }

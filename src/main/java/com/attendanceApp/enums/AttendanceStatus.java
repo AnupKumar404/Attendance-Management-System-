@@ -1,5 +1,5 @@
 package com.attendanceApp.enums;
 
 public enum AttendanceStatus {
-    PRESENT, ABSENT, LATE
+    PRESENT, ABSENT, LATE, ON_LEAVE
 }

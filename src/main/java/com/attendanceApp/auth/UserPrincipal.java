@@ -1,29 +1,24 @@
 package com.attendanceApp.auth;
 
-import com.attendanceApp.entities.User;
-import com.attendanceApp.enums.Role;
-import lombok.AllArgsConstructor;
+import com.attendanceApp.entities.Users;
+import com.attendanceApp.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 
 @RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private final User user;
+    private final Users user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_"+role.name()))
-                .collect(Collectors.toList());
+        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().toString()));
     }
 
     @Override
@@ -33,10 +28,10 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getEmail();
     }
 
-    public Set<Role> getRoles(){
-        return user.getRoles();
+    public UserRole getRoles(){
+        return user.getRole();
     }
 }
