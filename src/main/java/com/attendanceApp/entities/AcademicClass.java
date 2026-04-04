@@ -1,17 +1,15 @@
 package com.attendanceApp.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
+@Entity(name = "academic_classes")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Builder
-public class AcademicClasses {
+public class AcademicClass {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +17,7 @@ public class AcademicClasses {
 
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = false, unique = true)
-    private Departments department;
+    private Department department;
 
     @Column(nullable = false, unique = true)
     private Integer semester;

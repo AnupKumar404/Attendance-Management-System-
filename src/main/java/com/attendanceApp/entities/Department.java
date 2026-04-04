@@ -1,26 +1,24 @@
 package com.attendanceApp.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
-@Entity
+@Entity(name = "departments")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
-public class Departments {
+@Setter
+public class Department {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "department_name")
     private String name;
 
     @Column(nullable = false, unique = true)
-    private String code;
+    private String headOfDepartment;
 }

@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
-                                    jwtProvider.extractUsername(token), null, userDetails.getAuthorities());
+                                    userDetails, null, userDetails.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
@@ -63,6 +63,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.equals("/api/v1/auth**");
+    }
 
     private String extractToken (HttpServletRequest request){
         // Option A: Try to get from Cookie first (Priority)
@@ -76,7 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String bearerToken = request.getHeader("Authorization");
 
         if(bearerToken != null && bearerToken.startsWith("Bearer ")){
-            return bearerToken.split("Bearer ")[1];
+            return bearerToken.substring(7);
         }
 
         return null;

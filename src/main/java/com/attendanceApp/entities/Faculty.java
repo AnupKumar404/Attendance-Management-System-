@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Entity(name = "faculties")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,10 +19,10 @@ public class Faculty {
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
-    private Users user;
+    private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
-    private Departments department;
+    private Department department;
 
 }

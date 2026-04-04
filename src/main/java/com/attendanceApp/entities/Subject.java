@@ -1,17 +1,17 @@
 package com.attendanceApp.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
+import java.util.List;
+
+@Entity(name = "subjects")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
-public class Subjects {
+@Setter
+public class Subject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +22,7 @@ public class Subjects {
 
     @Column(nullable = false, unique = true)
     private String code;
+
+    @ManyToMany(mappedBy = "enrolledSubjects")
+    private List<Student> enrolledStudents;
 }

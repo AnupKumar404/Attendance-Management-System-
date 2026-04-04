@@ -4,10 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,10 +21,12 @@ public class GlobalExceptionHandler {
         log.warn("Not found: {}", exception.getMessage());
 
         ErrorResponse error = new ErrorResponse
-                (HttpStatus.NOT_FOUND.value(),
+                        (
+                        HttpStatus.NOT_FOUND.value(),
                         "Not_Found",
                         exception.getMessage(),
-                        req.getRequestURI());
+                        req.getRequestURI(),
+                        LocalDateTime.now());
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
@@ -37,20 +41,22 @@ public class GlobalExceptionHandler {
                 (HttpStatus.BAD_REQUEST.value(),
                         "Invalid_Input",
                         exception.getMessage(),
-                        req.getRequestURI());
+                        req.getRequestURI(),
+                        LocalDateTime.now());
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(InvalidJwtException.class)
-    public ResponseEntity<ErrorResponse> authenticationException
-            (InvalidJwtException  authenticationException, HttpServletRequest req)
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> badCredentialsException
+            (BadCredentialsException  exception, HttpServletRequest req)
     {
         ErrorResponse error = new ErrorResponse
                 (HttpStatus.UNAUTHORIZED.value()
                         , "Unauthorized",
-                        authenticationException.getMessage()
-                , req.getRequestURI());
+                        exception.getMessage()
+                , req.getRequestURI(),
+                        LocalDateTime.now());
 
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
@@ -62,7 +68,8 @@ public class GlobalExceptionHandler {
                 (HttpStatus.CONFLICT.value(),
                         "Conflict",
                         exception.getMessage(),
-                        request.getRequestURI());
+                        request.getRequestURI(),
+                        LocalDateTime.now());
 
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
@@ -74,7 +81,8 @@ public class GlobalExceptionHandler {
                 (HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         "Internal_Server_Error",
                         exception.getMessage(),
-                        req.getRequestURI());
+                        req.getRequestURI(),
+                        LocalDateTime.now());
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

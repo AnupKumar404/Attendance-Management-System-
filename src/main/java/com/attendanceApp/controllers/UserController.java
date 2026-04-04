@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +31,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping()
-    public ResponseEntity<Page<ResponseUserDto>> getAll(){
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    @GetMapping
+    public ResponseEntity<Page<ResponseUserDto>> getAll(Pageable pageable){
+        return new ResponseEntity<>(userService.getAllUsers(pageable), HttpStatus.OK);
     }
 
 
@@ -49,5 +50,11 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<ResponseUserDto> getUserByName(@RequestParam String name){
         return ResponseEntity.ok(userService.getUserByName(name));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

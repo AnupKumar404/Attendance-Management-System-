@@ -1,6 +1,8 @@
 package com.attendanceApp.services;
 
 import com.attendanceApp.dtos.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
 
@@ -12,7 +14,11 @@ public interface UserService {
 
     ResponseUserDto updateExistingUser(Long id, RequestUserDto user);
 
-    boolean changeStateOfUser(String name);
+    ResponseUserDto getUserByName(String name);
+
+    Page<ResponseUserDto> getAllUsers(Pageable pageable);
 
     ResponseUserDto updatePartial(Long id, Map<String, Object> updateValue);
+
+    void deleteUserById(Long id);
 }

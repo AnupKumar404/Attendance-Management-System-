@@ -1,13 +1,12 @@
 package com.attendanceApp.services.impl;
 
 import com.attendanceApp.dtos.*;
-import com.attendanceApp.entities.Students;
-import com.attendanceApp.entities.Users;
+import com.attendanceApp.entities.User;
 import com.attendanceApp.enums.UserRole;
 import com.attendanceApp.exceptions.DuplicateResourceException;
 import com.attendanceApp.exceptions.ResourceNotFoundException;
 import com.attendanceApp.projections.UserProjection;
-import com.attendanceApp.repositories.StudentsRepository;
+import com.attendanceApp.repositories.StudentRepository;
 import com.attendanceApp.repositories.UserRepository;
 import com.attendanceApp.services.EmailService;
 import com.attendanceApp.services.UserService;
@@ -18,12 +17,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,10 +42,6 @@ public class UserServiceImpl implements UserService{
 
     private final EmailService emailService;
 
-    private final StudentsRepository studentsRepo;
-
-    private Long roll = 2443045l;
-
 
     @Override
     @Transactional
@@ -51,23 +50,17 @@ public class UserServiceImpl implements UserService{
             throw new DuplicateResourceException("Already exists");
         }
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
                 .fullName(dto.fullName())
-                .role(UserRole.ROLE_STUDENT)
+                .role(UserRole.ADMIN)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())
-                .build();
-
-        Students student = Students.builder()
-                .user(user)
-                .rollNumber((roll += 1).toString())
-                .fatherName("Anil Mali")
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         userRepo.save(user);
-        studentsRepo.save(student);
         emailService.sendEmail(dto.email(), dto.fullName());
         return modelMapper.map(user, ResponseUserDto.class);
     }
@@ -75,7 +68,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public ResponseUserDto getUserById(Long id) {
-        Users user = userRepo.findById(id)
+        User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return modelMapper.map(user, ResponseUserDto.class);
@@ -84,48 +77,42 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public ResponseUserDto updateExistingUser(Long id, RequestUserDto updatedUser) {
-        Users existingUsers = userRepo.findById(id)
+        User existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new
                         ResourceNotFoundException("user with id "+id+" doesn't exists!"));
 
-        existingUsers.setEmail(updatedUser.email());
-        existingUsers.setPassword(passwordEncoder.encode(updatedUser.password()));
-        existingUsers.setFullName(updatedUser.fullName());
+        existingUser.setEmail(updatedUser.email());
+        existingUser.setPassword(passwordEncoder.encode(updatedUser.password()));
+        existingUser.setFullName(updatedUser.fullName());
 
-        Users newUpdatedUsers = userRepo.save(existingUsers);
-        return modelMapper.map(newUpdatedUsers, ResponseUserDto.class);
+        User newUpdatedUser = userRepo.save(existingUser);
+        return modelMapper.map(newUpdatedUser, ResponseUserDto.class);
     }
 
     @Override
-    public boolean changeStateOfUser(String name) {
-        return userRepo.isUserActive(name)
-                 .orElseThrow(() -> new ResourceNotFoundException("User not Found"));
-    }
+    public Page<ResponseUserDto> getAllUsers(@PageableDefault(page = 0, size = 20, direction = Sort.Direction.DESC)
+                                             Pageable pageable){
 
-
-    public Page<ResponseUserDto> getAllUsers(){
-        Pageable pageable = PageRequest.of(0, 20);
-        return userRepo.findAllUsers(pageable)
-                .map((element) -> modelMapper.map(element, ResponseUserDto.class));
+        return userRepo.findAllUsers(pageable).map(user -> modelMapper.map(user, ResponseUserDto.class));
     }
 
     @Override
     public ResponseUserDto updatePartial(Long id, Map<String, Object> updateValue) {
-        Users users = userRepo.findById(id)
+        User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 
         updateValue.forEach((key, value) -> {
             switch(key){
-                case "username":
-                    users.setEmail((String) value);
+                case "email":
+                    user.setEmail((String) value);
                     break;
 
                 case "fullName":
-                    users.setFullName((String) value);
+                    user.setFullName((String) value);
                     break;
 
                 case "password":
-                    users.setPassword(passwordEncoder.encode((String) value));
+                    user.setPassword(passwordEncoder.encode((String) value));
                     break;
 
                 default:
@@ -133,22 +120,31 @@ public class UserServiceImpl implements UserService{
             }
         });
 
-        userRepo.save(users);
-        return modelMapper.map(users, ResponseUserDto.class);
+        userRepo.save(user);
+        return modelMapper.map(user, ResponseUserDto.class);
     }
 
-    public ResponseUserDto getUserByName(String name){
+    @Override
+    public void deleteUserById(Long id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String finalName = Arrays.stream(name.split("\\s"))
+        userRepo.delete(user);
+    }
+
+    @Override
+    public ResponseUserDto getUserByName(String fullName){
+
+        String finalName = Arrays.stream(fullName.split("\\s"))
                 .map(word -> Character.toTitleCase(word.charAt(0))
                         + word.substring(1))
                 .collect(Collectors.joining(" "));
 
 
-        UserProjection getUsers = userRepo.findByFullName(finalName)
+        UserProjection user = userRepo.findByFullName(finalName)
                 .orElseThrow(() -> new
-                        ResourceNotFoundException(finalName+" doesn't exists!"));
+                        ResourceNotFoundException(finalName+" doesn't exists"));
 
-        return modelMapper.map(getUsers, ResponseUserDto.class);
+        return modelMapper.map(user, ResponseUserDto.class);
     }
 }

@@ -1,9 +1,5 @@
 package com.attendanceApp.config;
 
-import com.attendanceApp.auth.CustomAuthenticationFailureHandler;
-import com.attendanceApp.auth.UserPrincipal;
-import com.attendanceApp.enums.UserRole;
-import com.attendanceApp.utils.JwtAuthEntryPoint;
 import com.attendanceApp.utils.JwtAuthenticationFilter;
 import com.attendanceApp.utils.JwtProvider;
 import com.attendanceApp.auth.CustomUserDetailsService;
@@ -29,8 +25,6 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtProvider jwtProvider;
-    private final JwtAuthEntryPoint entryPoint;
-    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -57,16 +51,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .exceptionHandling(exc -> exc.authenticationEntryPoint(entryPoint))
-
                 .authenticationProvider(authenticationProvider())
 
-                .formLogin(login -> login.loginProcessingUrl("api/v1/auth/login")
-                        .failureHandler(customAuthenticationFailureHandler))
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/users/**")
-                        .permitAll().anyRequest().authenticated()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/users/**").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class)

@@ -6,12 +6,14 @@ import lombok.Data;
 @Data
 public class ResponseUserDto{
 
-         String email;
+        Long id;
 
-         String fullName;
+        String email;
 
-         UserRole role;
+        String fullName;
 
-         Boolean isActive;
+        UserRole role;
+
+        Boolean isActive;
 
 }

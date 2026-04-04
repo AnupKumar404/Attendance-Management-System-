@@ -1,17 +1,17 @@
 package com.attendanceApp.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
+import java.util.List;
+
+@Entity(name = "students")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
-public class Students {
+@Setter
+public class Student {
 
     @Id
     private Long Id;
@@ -19,15 +19,22 @@ public class Students {
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
-    private Users user;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "current_class_id")
-    private AcademicClasses currentClassId;
+    private AcademicClass currentClassId;
 
     @Column(nullable = false, unique = true)
     private String rollNumber;
 
     @Column(nullable = false)
     private String fatherName;
+
+    @ManyToMany
+    @JoinTable(name = "Enrollment",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    private List<Subject> enrolledSubjects;
 }

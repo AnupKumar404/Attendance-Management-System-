@@ -1,7 +1,8 @@
 package com.attendanceApp.auth;
 
-import com.attendanceApp.entities.Users;
+import com.attendanceApp.entities.User;
 import com.attendanceApp.enums.UserRole;
+import com.attendanceApp.projections.LoginProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,7 +15,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private final Users user;
+    private final LoginProjection user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -31,7 +32,7 @@ public class UserPrincipal implements UserDetails {
         return user.getEmail();
     }
 
-    public UserRole getRoles(){
+    public String getRoles(){
         return user.getRole();
     }
 }

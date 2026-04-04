@@ -24,15 +24,17 @@ public class AuthController {
 
         JwtResponseDto result = authService.login(req);
 
-        ResponseCookie cookie = ResponseCookie.from("access_token", result.token())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(10*60)
-                .sameSite("Strict")
-                .build();
+            ResponseCookie cookie = ResponseCookie.from("access_token", result.token())
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(10 * 60)
+                    .sameSite("Strict")
+                    .build();
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(result.role());
+            String message = "Login Successfully";
+
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(message);
     }
 }
